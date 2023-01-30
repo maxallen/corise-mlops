@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from .app.server import app
 
 os.chdir('app')
-client = TestClient(app)
 
 """
 We've built our web application, and containerized it with Docker.
@@ -20,41 +19,46 @@ It would be nice to write some tests to ensure we don't regress!
 
 def test_root():
     """
-    [TO BE IMPLEMENTED]
     Test the root ("/") endpoint, which just returns a {"Hello": "World"} json response
     """
-    pass
+    with TestClient(app) as client:
+        resp = client.get("/") 
+        assert resp.status_code == 200
+        assert resp.json() == {"Hello": "World"}
 
 
 def test_predict_empty():
     """
-    [TO BE IMPLEMENTED]
     Test the "/predict" endpoint, with an empty request body
     """
-    pass
+    with TestClient(app) as client:
+        resp = client.post("/predict", json={})
+        assert resp.status_code == 500
 
 
 def test_predict_en_lang():
     """
-    [TO BE IMPLEMENTED]
     Test the "/predict" endpoint, with an input text in English (you can use one of the test cases provided in README.md)
     """
-    pass
+    with TestClient(app) as client:
+        resp = client.post("/predict", json={"source": "WESH.com", "url": "http://www.rockdalecitizen.net/sc/archive/2004/5214.htm", "title": "Hazard Level Upped At Mount St. Helens", "description": "VANCOUVER, Wash. -- A second steam eruption at Mount St. Helens and changes in seismic signals prompted the government to raise the volcano alert to Level Three on Saturday afternoon."})
+        assert resp.status_code == 200
 
 
 def test_predict_es_lang():
     """
-    [TO BE IMPLEMENTED]
     Test the "/predict" endpoint, with an input text in Spanish. 
     Does the tokenizer and classifier handle this case correctly? Does it return an error?
     """
-    pass
-
+    with TestClient(app) as client:
+        resp = client.post("/", json={"source": "Me", "url": "", "title": "", "description": "VEVEY, Suiza—Nestlé SA suspendió su meta de crecimiento anual de ventas al menos durante los próximos tres años, en momentos en que el gigante suizo de alimentos procesados lucha junto al resto del sector contra una inflación sumamente baja y los rápidos cambios en los gustos de los consumidores."})
+        assert resp.status_code == 200
 
 def test_predict_non_ascii():
     """
-    [TO BE IMPLEMENTED]
     Test the "/predict" endpoint, with an input text that has non-ASCII characters. 
     Does the tokenizer and classifier handle this case correctly? Does it return an error?
     """
-    pass
+    with TestClient(app) as client:
+        resp = client.post("/predict", json={"source": "Me", "url": "", "title": "", "description": "VEVEY, Suiza—Nestlé SA suspendió su meta de crecimiento anual de ventas al menos durante los próximos tres años, en momentos en que el gigante suizo de alimentos procesados lucha junto al resto del sector contra una inflación sumamente baja y los rápidos cambios en los gustos de los consumidores."})
+        assert resp.status_code == 200
